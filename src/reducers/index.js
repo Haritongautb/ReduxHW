@@ -4,12 +4,6 @@ const initialState = {
     filterButtonsLoadingStatus: 'idle',
     filterButtonsData: [],
     activeFilterButton: 'all',
-    newHero: {
-        name: "",
-        description: "",
-        element: "",
-        id: null
-    }
 }
 
 const reducer = (state = initialState, action) => {
@@ -46,26 +40,20 @@ const reducer = (state = initialState, action) => {
                 ...state,
                 filterButtonsStatus: 'error'
             }
-        case 'ON_INPUT_NEW_HERO':
+        case 'NEW_HERO_CREATED':
             return {
                 ...state,
-                newHero: {
-                    ...state.newHero,
-                    ...action.payload
-                }
-            }
-        case 'CLEANER_NEW_HERO_INPUTS':
-            return {
-                ...state,
-                newHero: {
-                    ...state.newHero,
-                    ...action.payload
-                }
+                heroes: [...state.heroes, action.payload]
             }
         case 'CHANGE_ACTIVE_BUTTON':
             return {
                 ...state,
                 activeFilterButton: action.payload
+            }
+        case 'HERO_DELETED':
+            return {
+                ...state,
+                heroes: state.heroes.filter(item => item.id !== action.payload)
             }
         default: return state
     }

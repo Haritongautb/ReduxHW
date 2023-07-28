@@ -1,8 +1,8 @@
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { onInput } from "../../actions";
 import { useHttp } from "../../hooks/http.hook";
 import { v4 as uuidv4 } from 'uuid';
-import { heroesFetching, heroesFetched, heroesFetchingError, cleanerNewHero } from "../../actions";
+import { newHeroCreated } from "../../actions";
 
 // Задача для этого компонента:
 // Реализовать создание нового героя с введенными данными. Он должен попадать
@@ -15,7 +15,15 @@ import { heroesFetching, heroesFetched, heroesFetchingError, cleanerNewHero } fr
 // данных из фильтров
 
 const HeroesAddForm = () => {
-    const { newHero: { name, description, element } } = useSelector(state => state)
+    const [newHero, setNewHero] = useState({
+        name: "",
+        description: "",
+        element: "",
+        id: null
+    })
+
+    const { filterButtonsLoadingStatus, filterButtonsData } = useSelector(state => state);
+
     const dispatch = useDispatch();
     const { request } = useHttp();
 
@@ -24,20 +32,39 @@ const HeroesAddForm = () => {
         event.target.disabled = true;
         if (event && event.target) {
             const rndID = uuidv4();
-            request("http://localhost:3001/heroes", "POST", JSON.stringify({ name, description, element, id: rndID }))
-                .then(updateHeroes)
-                .then(() => dispatch(cleanerNewHero()))
+            request("http://localhost:3001/heroes", "POST", JSON.stringify({ ...newHero, id: rndID }))
+                .then(heroCreated => dispatch(newHeroCreated(heroCreated)))
+                .then(() => setNewHero({
+                    name: "",
+                    description: "",
+                    element: "",
+                    id: null
+                }))
                 .then(() => event.target.disabled = false)
+                .catch(e => console.log(e))
         }
     }
 
-    const updateHeroes = () => {
-        dispatch(heroesFetching());
-        request("http://localhost:3001/heroes")
-            .then(data => dispatch(heroesFetched(data)))
-            .catch(() => dispatch(heroesFetchingError()))
+    const onInput = (event) => {
+        setNewHero(newHero => ({ ...newHero, [event.target.name]: event.target.value }))
     }
 
+    const renderFilters = (arr, loadingStatus) => {
+        if (loadingStatus === "load") {
+            return <option>Загрузка элементов</option>
+        } else if (loadingStatus === "error") {
+            return <option>Ошибка загрузки</option>
+        }
+
+        return arr.map(item => {
+            if (item.element === "all") {
+                return;
+            }
+            return <option key={item.element} value={item.element}>{item.label}</option>
+        })
+    }
+
+    const elements = renderFilters(filterButtonsData, filterButtonsLoadingStatus);
     return (
         <form className="border p-4 shadow-lg rounded">
             <div className="mb-3">
@@ -49,8 +76,8 @@ const HeroesAddForm = () => {
                     className="form-control"
                     id="name"
                     placeholder="Как меня зовут?"
-                    value={name}
-                    onChange={(event) => dispatch(onInput(event))} />
+                    value={newHero.name}
+                    onChange={onInput} />
             </div>
 
             <div className="mb-3">
@@ -62,8 +89,8 @@ const HeroesAddForm = () => {
                     id="text"
                     placeholder="Что я умею?"
                     style={{ "height": '130px' }}
-                    value={description}
-                    onChange={(event) => dispatch(onInput(event))} />
+                    value={newHero.description}
+                    onChange={onInput} />
             </div>
 
             <div className="mb-3">
@@ -73,13 +100,10 @@ const HeroesAddForm = () => {
                     className="form-select"
                     id="element"
                     name="element"
-                    value={element}
-                    onChange={(event) => dispatch(onInput(event))}>
+                    value={newHero.element}
+                    onChange={onInput}>
                     <option >Я владею элементом...</option>
-                    <option value="fire">Огонь</option>
-                    <option value="water">Вода</option>
-                    <option value="wind">Ветер</option>
-                    <option value="earth">Земля</option>
+                    {elements}
                 </select>
             </div>
 

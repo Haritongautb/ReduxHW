@@ -1,14 +1,4 @@
-import { useHttp } from "../../hooks/http.hook";
-
-const HeroesListItem = ({ name, description, element, updateHeroes, id }) => {
-
-    const { request } = useHttp();
-
-    const onDeleteHero = (id) => {
-        request(`http://localhost:3001/heroes/${id}`, "DELETE")
-            .then(updateHeroes)
-    }
-
+const HeroesListItem = ({ name, description, element, onDeleteHero }) => {
     let elementClassName;
 
     switch (element) {
@@ -42,7 +32,7 @@ const HeroesListItem = ({ name, description, element, updateHeroes, id }) => {
             </div>
             <span
                 className="position-absolute top-0 start-100 translate-middle badge border rounded-pill bg-light"
-                onClick={() => onDeleteHero(id)}>
+                onClick={onDeleteHero}>
                 <button type="button" className="btn-close btn-close" aria-label="Close"></button>
             </span>
         </li>

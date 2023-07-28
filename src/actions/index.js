@@ -17,27 +17,6 @@ export const heroesFetchingError = () => {
     }
 }
 
-export const onInput = (event) => {
-    return {
-        type: 'ON_INPUT_NEW_HERO',
-        payload: {
-            [event.target.name]: event.target.value
-        }
-    }
-}
-
-export const cleanerNewHero = () => {
-    return {
-        type: 'CLEANER_NEW_HERO_INPUTS',
-        payload: {
-            name: "",
-            description: "",
-            element: "",
-            id: null
-        }
-    }
-}
-
 export const filterButtonsFetching = () => {
     return {
         type: 'FILTER_BUTTONS_FETCHING'
@@ -63,3 +42,17 @@ export const changeActiveButton = (activeButton) => {
         payload: activeButton
     }
 }
+
+export const heroDeleted = (id) => {
+    return {
+        type: 'HERO_DELETED',
+        payload: id
+    }
+}
+
+export const newHeroCreated = (newHeroData) => {
+    return {
+        type: 'NEW_HERO_CREATED',
+        payload: newHeroData
+    }
+}   
